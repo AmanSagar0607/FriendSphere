@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { setUser, setError } from '../slices/userSlice';
-import api from '../utils/api';
+import { login } from '../utils/api';
 import Card from './ui/Card';
 import Button from './ui/Button';
+import api from '../utils/api'; // Make sure to import the api instance
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -15,13 +16,18 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post('/auth/login', { username, password });
-      dispatch(setUser(res.data.user));
-      localStorage.setItem('token', res.data.token);
-      api.defaults.headers.common['x-auth-token'] = res.data.token;
+      console.log('Attempting login...'); // Add this line
+      const response = await login(username, password);
+      console.log('Login response:', response); // Add this line
+      // Handle successful login
+      dispatch(setUser(response.data.user));
+      localStorage.setItem('token', response.data.token);
+      api.defaults.headers.common['x-auth-token'] = response.data.token;
       navigate('/');
-    } catch (err) {
-      dispatch(setError(err.response?.data?.msg || 'An error occurred'));
+    } catch (error) {
+      console.error('Login error:', error.response || error);
+      // Handle login error
+      dispatch(setError(error.response?.data?.msg || 'An error occurred'));
     }
   };
 
